@@ -16,6 +16,15 @@ export default function LayOut() {
           </nav>
         </div>
       </header>
+
+      <main className="app-main">
+        <SignedOut>
+          <Navigate to="/sign-in" replace={true} />
+        </SignedOut>
+        <SignedIn>
+          <Outlet />
+        </SignedIn>
+      </main  >
     </div>
   );
 }
