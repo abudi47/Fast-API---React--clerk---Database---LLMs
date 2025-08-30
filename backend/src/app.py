@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request ,Response
-
+from .routes import challenge
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -11,4 +11,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(challenge.router, prefix="/api")
 

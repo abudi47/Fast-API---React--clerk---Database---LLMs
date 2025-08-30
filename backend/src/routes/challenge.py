@@ -13,7 +13,7 @@ from ..database.db import (
 
 from ..utils import authenticate_and_get_user_details
 from ..database.models import get_db
-
+from ..ai_generator import generate_challenge_with_ai
 
 import json 
 from datetime import datetime
@@ -47,8 +47,14 @@ async def generate_challenge(request: Request, challenge_request: ChallengeReque
         if quota.remaining_quota <= 0:
             raise HTTPException(status_code=403, detail="Challenge quota exceeded. Please try again later.")
 
-        challenge_data = None
+        challenge_data = generate_challenge_with_ai(request.difficulty)
 
+        new_challenge = create_challenge(
+            db=db,
+            difficulty=request.difficulty,
+            created_by=user_id,
+            **challenge_data
+        )
 
 
         # Decrement the quota
@@ -56,9 +62,9 @@ async def generate_challenge(request: Request, challenge_request: ChallengeReque
         db.commit()
         # db.refresh(quota)
 
-        return {"challenge": challenge_data, "quota_remaining": quota.quota_remaining}
+        return {"id" : new_challenge.id,"difficulty": request.difficulty, "title": new_challenge.title, "options": json.loads(new_challenge.options), "correct_answer_id": new_challenge.correct_answer_id, "explanation": new_challenge.explanation, "timestamp": new_challenge.date_created.isoformat()}
     
-    
+
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:

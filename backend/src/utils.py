@@ -1,10 +1,11 @@
-from clerk_backend_api import Clerk , AuthenticateRequestOptions
 from fastapi import HTTPException
+from clerk_backend_api import Clerk, AuthenticateRequestOptions
+
 from dotenv import load_dotenv
 import os
 
 
-clerk_sdk = Clerk(bearer_token=os.getenv("CLERK_API_KEY"))
+clerk_sdk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
 
 def authenticate_and_get_user_details(request):
     try:
