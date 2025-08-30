@@ -9,7 +9,6 @@ load_dotenv()
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-
 def generate_challenge_with_ai(difficulty: str) -> Dict[str, Any]:
     system_prompt = """You are an expert coding challenge creator. 
     Your task is to generate a coding question with multiple choice answers.
@@ -31,28 +30,27 @@ def generate_challenge_with_ai(difficulty: str) -> Dict[str, Any]:
     """
     try:
         response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-3.5-turbo-0125",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Generate a {difficulty} coding challenge."}
+                {"role": "user", "content": f"Generate a {difficulty} difficulty coding challenge."}
             ],
-        response_formats= {"type": "json_object" },
-        temprature = 0.7
-
+            response_format={"type": "json_object"},
+            temperature=0.7
         )
+
         content = response.choices[0].message.content
-        try:
-            challenge_data = json.loads(content)
-            required_fields = {"title", "options", "correct_answer_id", "explanation"}
-            
-            for field in required_fields:
-                if field not in challenge_data:
-                    raise ValueError(f"Missing required field: {field}")
-            return challenge_data
-        except json.JSONDecodeError:
-            raise ValueError("Failed to parse AI response as JSON")
+        challenge_data = json.loads(content)
+
+        required_fields = ["title", "options", "correct_answer_id", "explanation"]
+        for field in required_fields:
+            if field not in challenge_data:
+                raise ValueError(f"Missing required field: {field}")
+
+        return challenge_data
+
     except Exception as e:
-        print(f"Error processing AI response: {e}")
+        print(e)
         return {
             "title": "Basic Python List Operation",
             "options": [
@@ -64,7 +62,3 @@ def generate_challenge_with_ai(difficulty: str) -> Dict[str, Any]:
             "correct_answer_id": 0,
             "explanation": "In Python, append() is the correct method to add an element to the end of a list."
         }
-
-    
-    
-    
